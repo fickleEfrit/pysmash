@@ -1,7 +1,10 @@
+from _thread import start_new_thread
+
 from pysmash import SmashGG
 from twilio.rest import Client
 from tkinter import *
-
+from time import time, sleep
+from threading import Timer
 
 # this is where the logic will be stored for our smash notifier
 # on start we will input a player-tag, a tournament, a frequency,
@@ -55,7 +58,11 @@ def get_message():
 def print_message():
     print(get_message())
 
-b = Button(root, text="remind", width=10, command=print_message)
+def message_loop():
+    print_message()
+    root.after(5000, message_loop)
+
+b = Button(root, text="remind", width=10, command=message_loop)
 b.grid(row=3,column=0)
 
 root.mainloop()
