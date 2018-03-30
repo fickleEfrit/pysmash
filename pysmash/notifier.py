@@ -63,7 +63,9 @@ def message_loop():
     root.after(5000, message_loop)
 
 b = Button(root, text="remind", width=10, command=message_loop)
+b2 = Button(root, text="quit", width=10, command=sys.exit)
 b.grid(row=3,column=0)
+b2.grid(row=3,column=1)
 
 root.mainloop()
 
