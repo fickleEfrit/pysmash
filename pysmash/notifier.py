@@ -19,7 +19,6 @@ from threading import Timer
 # we will also listen for a response -- if the response is STOP, then we break the loop and stop sending alerts
 
 smash = SmashGG()
-player_tag, tournament_name, player_phone_number = "","",""
 events = {1 : 'melee-singles', 2 : 'wii-u-singles', 3 : 'smash-64-singles', 4 : 'rivals-of-aether'}
 
 # we import the Twilio client from the dependency we just installed
@@ -53,6 +52,10 @@ e3.grid(row=2,column=1)
 
 
 def get_message():
+    #disable the labels then return their contents
+    e1.config(state='readonly')
+    e2.config(state='readonly')
+    e3.config(state='readonly')
     return e1.get(), e2.get(), e3.get()
 
 def print_message():
@@ -61,6 +64,16 @@ def print_message():
 def message_loop():
     print_message()
     root.after(5000, message_loop)
+
+def check_for_unplayed():
+    player_tag, tournament_name, event_name = get_message()
+    sets = smash.tournament_show_player_sets(tournament_name=tournament_name, player_tag=player_tag, event=event_name, filter_completed=True, filter_future=True, filter_current=False)
+    for set in sets:
+        if not set['entrant_1_id'] is None and not set['entrant_2_id'] is None: #set has 2 entrants
+            if not set['winnerId'] is None and not set['loserId'] is None: #set does not yet have a winner and loser
+                if not set['entrant_1_score'] is None and not set['entrant_2_score'] is None: #set has also not yet started, because there is no score
+                    return True
+    return False #if we reach the end of the loop, there were no unplayed sets
 
 b = Button(root, text="remind", width=10, command=message_loop)
 b2 = Button(root, text="quit", width=10, command=sys.exit)
