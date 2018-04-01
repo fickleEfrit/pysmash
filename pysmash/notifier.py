@@ -68,12 +68,14 @@ def message_loop():
 def check_for_unplayed():
     player_tag, tournament_name, event_name = get_message()
     sets = smash.tournament_show_player_sets(tournament_name=tournament_name, player_tag=player_tag, event=event_name, filter_completed=True, filter_future=True, filter_current=False)
-    for set in sets:
+    only_sets = sets['sets']
+    for set in only_sets:
         if not set['entrant_1_id'] is None and not set['entrant_2_id'] is None: #set has 2 entrants
-            if not set['winnerId'] is None and not set['loserId'] is None: #set does not yet have a winner and loser
-                if not set['entrant_1_score'] is None and not set['entrant_2_score'] is None: #set has also not yet started, because there is no score
+            if set['winner_id'] == 'None' and set['loser_id'] == 'None': #set does not yet have a winner and loser
+                if set['entrant_1_score'] is None and set['entrant_2_score'] is None: #set has also not yet started, because there is no score
                     return True
     return False #if we reach the end of the loop, there were no unplayed sets
+
 
 b = Button(root, text="remind", width=10, command=message_loop)
 b2 = Button(root, text="quit", width=10, command=sys.exit)
