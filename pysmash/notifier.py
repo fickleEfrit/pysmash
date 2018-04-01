@@ -45,10 +45,14 @@ l2 = Label(root, text="Tournament name (Taken from smashgg url, see doc for spec
 l2.grid(row=1,column=0)
 e2 = Entry(root)
 e2.grid(row=1,column=1)
-l2 = Label(root, text="Phone number (format: +xxxxxxxxxxx)\n")
-l2.grid(row=2,column=0)
+l3 = Label(root, text="Event name (Taken from smashgg url)\n")
+l3.grid(row=2,column=0)
 e3 = Entry(root)
 e3.grid(row=2,column=1)
+l4 = Label(root, text="Phone Number including + and national code(format: +xxxxxxxxxxx)")
+l4.grid(row=3, column=0)
+e4 = Entry(root)
+e4.grid(row=3, column=1)
 
 
 def get_message():
@@ -56,7 +60,11 @@ def get_message():
     e1.config(state='readonly')
     e2.config(state='readonly')
     e3.config(state='readonly')
+    e4.config(state='readonly')
     return e1.get(), e2.get(), e3.get()
+
+def get_phone_number():
+    return e4.get()
 
 def print_message():
     print(get_message())
@@ -79,8 +87,8 @@ def check_for_unplayed():
 
 b = Button(root, text="remind", width=10, command=message_loop)
 b2 = Button(root, text="quit", width=10, command=sys.exit)
-b.grid(row=3,column=0)
-b2.grid(row=3,column=1)
+b.grid(row=4,column=0)
+b2.grid(row=4,column=1)
 
 root.mainloop()
 
