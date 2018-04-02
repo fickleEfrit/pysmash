@@ -63,15 +63,19 @@ def get_message():
     e4.config(state='readonly')
     return e1.get(), e2.get(), e3.get()
 
+
 def get_phone_number():
     return e4.get()
+
 
 def print_message():
     print(get_message())
 
+
 def message_loop():
     print_message()
     root.after(5000, message_loop)
+
 
 def check_for_unplayed():
     player_tag, tournament_name, event_name = get_message()
@@ -85,8 +89,21 @@ def check_for_unplayed():
     return False #if we reach the end of the loop, there were no unplayed sets
 
 
-b = Button(root, text="remind", width=10, command=message_loop)
-b2 = Button(root, text="quit", width=10, command=sys.exit)
+def check_and_notify():
+    player_tag = e1.get()
+    event_name = e3.get()
+    if check_for_unplayed(): #we need to send a message
+        message_body = "Hey " + player_tag + ", you have an unplayed match for " + event_name + "! \n -smashnotify <3"
+        client.messages.create(to=get_phone_number(), from_="+12016454023", body=message_body)
+        #we are in a set and have sent a message, so we can wait a longer time before reminding
+        root.after(600000, check_and_notify)
+    else:
+        root.after(300000, check_and_notify) #we were not in a set, so need to check again sooner
+
+
+
+b = Button(root, text="remind", width=10, command=check_and_notify) #button to start checking and notifying
+b2 = Button(root, text="quit", width=10, command=sys.exit) #button to exit - stops the loop and the program
 b.grid(row=4,column=0)
 b2.grid(row=4,column=1)
 
