@@ -3,40 +3,11 @@ from _thread import start_new_thread
 from pysmash import SmashGG
 from twilio.rest import Client
 from tkinter import *
-from time import time, sleep
-from threading import Timer
 
-# this is where the logic will be stored for our smash notifier
-# on start we will input a player-tag, a tournament, a frequency,
-# and a phone number
-# first we verify the phone number, and wait for a response for the event (wii-u, melee etc.) which will be specified
-# with a response of 1,2,3 etc (shown in confirmation message)
-# first we check to make sure that the tournament specified contains the player specified
-# once we have made sure that the player is at the tournament, we will schedule an alert
-# the alert will send a text to the specified number notifying that there is a match between (given player) and theTsmash-
-# opponent found in our query. the message will also specify the event and tournament, as well as give a timestamp
-# we will send texts likely using twilio, and smashgg api is pysmash
-# we will also listen for a response -- if the response is STOP, then we break the loop and stop sending alerts
+smash = SmashGG() # needed to use smash.gg api
+client = Client("AC214be4c9c0197514d5b991494db67016", "08fb138a63f1d77825818aadd074cf36") # needed to send messages using twilio
 
-smash = SmashGG()
-events = {1 : 'melee-singles', 2 : 'wii-u-singles', 3 : 'smash-64-singles', 4 : 'rivals-of-aether'}
-
-# we import the Twilio client from the dependency we just installed
-
-# the following line needs your Twilio Account SID and Auth Token
-client = Client("AC214be4c9c0197514d5b991494db67016", "08fb138a63f1d77825818aadd074cf36")
-
-# change the "from_" number to your Twilio number and the "to" number
-# to the phone number you signed up for Twilio with, or upgrade your
-# account to send SMS to any phone number
-#client.messages.create(to="+13472672507",
- #                      from_="+12016454023",
-  #                     body="Hello from Python!")
-
-#we will use tkinter to have 4 entries, one for player tag, tournament name, and player phone number, and one for message frequency
-#there will also be radio buttons for the events, like melee singles, wii u singles, 64 singles, and rivals of aether
-#then we will have a button, which when pressed will schedule the check/text
-root = Tk()
+root = Tk() # tkinter root node
 l1 = Label(root, text="Player-tag (CASE SENSITIVE)\n")
 l1.grid(row=0,column=0)
 e1 = Entry(root)
@@ -56,6 +27,10 @@ e4.grid(row=3, column=1)
 
 
 def get_message():
+    """
+    method for fetching the player-tag, tournament, and event as well as locking entries once data has been entered
+    :return: player-tag, tournament-name, and event-name
+    """
     #disable the labels then return their contents
     e1.config(state='readonly')
     e2.config(state='readonly')
@@ -65,6 +40,9 @@ def get_message():
 
 
 def get_phone_number():
+    """
+    :return: phone number from label
+    """
     return e4.get()
 
 
@@ -78,6 +56,10 @@ def message_loop():
 
 
 def check_for_unplayed():
+    """
+    fetches information from the tkinter entries and then queries the smash.gg api to see whether the player has a match that they must start
+    :return: whether the player has a match that they must play
+    """
     player_tag, tournament_name, event_name = get_message()
     sets = smash.tournament_show_player_sets(tournament_name=tournament_name, player_tag=player_tag, event=event_name, filter_completed=True, filter_future=True, filter_current=False)
     only_sets = sets['sets']
@@ -90,15 +72,19 @@ def check_for_unplayed():
 
 
 def check_and_notify():
+    """
+    recursive function that checks whether the player has a match they must start. if they do, they are sent a text message to their entered phone number.
+    :return:
+    """
     player_tag = e1.get()
     event_name = e3.get()
     if check_for_unplayed(): #we need to send a message
         message_body = "Hey " + player_tag + ", you have an unplayed match for " + event_name + "! \n -smashnotify <3"
         client.messages.create(to=get_phone_number(), from_="+12016454023", body=message_body)
-        #we are in a set and have sent a message, so we can wait a longer time before reminding
+        #we are in a set and have sent a message, so we can wait a longer time (10 minutes) before reminding
         root.after(600000, check_and_notify)
     else:
-        root.after(300000, check_and_notify) #we were not in a set, so need to check again sooner
+        root.after(300000, check_and_notify) #we were not in a set, so need to check again sooner (5 minutes)
 
 
 
