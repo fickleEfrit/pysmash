@@ -76,7 +76,7 @@ def check_and_notify():
     recursive function that checks whether the player has a match they must start. if they do, they are sent a text message to their entered phone number.
     :return:
     """
-    b.config(state='DISABLED')
+    b.config(state='disabled')
     player_tag = e1.get()
     event_name = e3.get()
     if check_for_unplayed(): #we need to send a message
