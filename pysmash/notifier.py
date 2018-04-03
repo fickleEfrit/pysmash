@@ -5,7 +5,12 @@ from twilio.rest import Client
 from tkinter import *
 
 smash = SmashGG() # needed to use smash.gg api
-client = Client("AC214be4c9c0197514d5b991494db67016", "08fb138a63f1d77825818aadd074cf36") # needed to send messages using twilio
+auth = open("auth.txt", "r")
+my_account_sid = auth.readline()
+my_auth_token = auth.readline()
+source_number = auth.readline()
+
+client = Client(my_account_sid, my_auth_token) # needed to send messages using twilio
 
 root = Tk() # tkinter root node
 l1 = Label(root, text="Player-tag (CASE SENSITIVE)\n")
@@ -81,7 +86,7 @@ def check_and_notify():
     event_name = e3.get()
     if check_for_unplayed(): #we need to send a message
         message_body = "Hey " + player_tag + ", you have an unplayed match for " + event_name + "! \n -smashnotify <3"
-        client.messages.create(to=get_phone_number(), from_="+12016454023", body=message_body)
+        client.messages.create(to=get_phone_number(), from_=source_number, body=message_body)
         #we are in a set and have sent a message, so we can wait a longer time (10 minutes) before reminding
         root.after(600000, check_and_notify)
     else:
