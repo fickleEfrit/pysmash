@@ -1,5 +1,3 @@
-from _thread import start_new_thread
-
 from pysmash import SmashGG
 from twilio.rest import Client
 from tkinter import *
@@ -29,7 +27,6 @@ l4 = Label(root, text="Phone Number including + and national code(format: +xxxxx
 l4.grid(row=3, column=0)
 e4 = Entry(root)
 e4.grid(row=3, column=1)
-
 
 def get_message():
     """
@@ -75,6 +72,12 @@ def check_for_unplayed():
                     return True
     return False #if we reach the end of the loop, there were no unplayed sets
 
+#graphics thread
+#create new thread which is started within tkinter reflected by countdown
+#make tkinter window call sys.exit when closing
+#add tkinter timer
+#CHECK WHETHER WE HAVE INPUTS WE NEED SO WE DON'T BREAK
+#automatically stop updating when tournament is over
 
 def check_and_notify():
     """
@@ -84,7 +87,15 @@ def check_and_notify():
     b.config(state='disabled')
     player_tag = e1.get()
     event_name = e3.get()
-    if check_for_unplayed(): #we need to send a message
+    l5.config(text='')
+    if(player_tag == '' or event_name == '' or e2.get() == '' or get_phone_number() == ''):
+        b.config(state='normal')
+        l5.config(text='All values must be entered!')
+    elif(re.fullmatch(r"^\+\d{11}",get_phone_number()) is None):
+        b.config(state='normal')
+        l5.config(text='Phone number must match provided format!')
+
+    elif check_for_unplayed(): #we need to send a message
         message_body = "Hey " + player_tag + ", you have an unplayed match for " + event_name + "! \n -smashnotify <3"
         client.messages.create(to=get_phone_number(), from_=source_number, body=message_body)
         #we are in a set and have sent a message, so we can wait a longer time (10 minutes) before reminding
@@ -93,11 +104,12 @@ def check_and_notify():
         root.after(300000, check_and_notify) #we were not in a set, so need to check again sooner (5 minutes)
 
 
-
 b = Button(root, text="remind", width=10, command=check_and_notify) #button to start checking and notifying
+l5 = Label(root, text="")
+l5.grid(row=5,column=1)
 b2 = Button(root, text="quit", width=10, command=sys.exit) #button to exit - stops the loop and the program
 b.grid(row=4,column=0)
-b2.grid(row=4,column=1)
+b2.grid(row=5,column=0)
 
 root.title("Smashnotify")
 root.iconbitmap('smash.ico')
